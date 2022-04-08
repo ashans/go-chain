@@ -1,16 +1,21 @@
 package main
 
 import (
-	"fmt"
 	"github.com/ashans/go-chain/blockchain"
+	"github.com/ashans/go-chain/cli"
+	"github.com/ashans/go-chain/errors"
+	"github.com/dgraph-io/badger"
+	"os"
 )
 
 func main() {
+	defer os.Exit(0)
 	chain := blockchain.InitBlockChain()
+	defer func(Database *badger.DB) {
+		err := Database.Close()
+		errors.Handle(err)
+	}(chain.Database)
 
-	chain.AddBlock("First block")
-	chain.AddBlock("Second block")
-	chain.AddBlock("Third block")
-
-	fmt.Println(chain.ToString())
+	command := cli.NewCommandLine(chain)
+	command.Run()
 }
